@@ -7,6 +7,8 @@ export const usePokemonGame = () => {
   const gameStatus = ref<GameStatus>(GameStatus.Playing);
   const pokemons = ref<Pokemon[]>([]);
   const pokemonOptions = ref<Pokemon[]>([]);
+  const wonGames = ref<number>(0);
+  const lostGames = ref<number>(0);
 
   const randomPokemon = computed(() => {
     const randomIndex = Math.floor(Math.random() * pokemonOptions.value.length);
@@ -19,7 +21,8 @@ export const usePokemonGame = () => {
 
     const pokemonsArray = response.data.results.map((pokemon) => {
       const urlParts = pokemon.url.split('/');
-      const id = urlParts.at(-2) ?? 0;
+      console.log(urlParts);
+      const id = urlParts[urlParts.length - 2] ?? 0;
       return {
         name: pokemon.name,
         id: +id,
@@ -29,7 +32,7 @@ export const usePokemonGame = () => {
     return pokemonsArray.sort(() => Math.random() - 0.5);
   };
 
-  const getNextRound = (howMany: number = 4) => {
+  const getNextRound = (howMany: number = 5) => {
     gameStatus.value = GameStatus.Playing;
     pokemonOptions.value = pokemons.value.slice(0, howMany);
     pokemons.value = pokemons.value.slice(howMany);
@@ -40,6 +43,7 @@ export const usePokemonGame = () => {
 
     if (hasWon) {
       gameStatus.value = GameStatus.Won;
+      wonGames.value++;
       confetti({
         particleCount: 300,
         spread: 150,
@@ -49,7 +53,14 @@ export const usePokemonGame = () => {
     }
 
     gameStatus.value = GameStatus.Lost;
+    lostGames.value++;
   };
+
+  const resetTheGame = () => {
+    wonGames.value = 0;
+    lostGames.value = 0;
+    getNextRound(5);
+  }
 
   onMounted(async () => {
     pokemons.value = await getPokemons();
@@ -63,9 +74,12 @@ export const usePokemonGame = () => {
     isLoading,
     pokemonOptions,
     randomPokemon,
+    wonGames,
+    lostGames,
 
     // Methods
     getNextRound,
     checkAnswer,
+    resetTheGame,
   };
 };
