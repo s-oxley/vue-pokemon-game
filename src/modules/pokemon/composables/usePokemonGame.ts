@@ -21,7 +21,6 @@ export const usePokemonGame = () => {
 
     const pokemonsArray = response.data.results.map((pokemon) => {
       const urlParts = pokemon.url.split('/');
-      console.log(urlParts);
       const id = urlParts[urlParts.length - 2] ?? 0;
       return {
         name: pokemon.name,
@@ -63,10 +62,10 @@ export const usePokemonGame = () => {
   }
 
   onMounted(async () => {
+    // console.log('init on mounted');
     pokemons.value = await getPokemons();
     getNextRound();
-
-    console.log(pokemonOptions.value);
+    // console.log('finalize on mounted');
   });
 
   return {
