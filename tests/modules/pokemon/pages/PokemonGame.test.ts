@@ -13,6 +13,17 @@ vi.mock('@/modules/pokemon/composables/usePokemonGame', () => ({
     usePokemonGame: vi.fn()
 }));
 
+const optionsPokemonsMock = [
+    {
+        id: 1,
+        name: 'Bulbasaur',
+    },
+    {
+        id: 2,
+        name: 'Ivysaur',
+    },
+];
+
 describe('<PokemonGame />', () => {
     test('test initialize page', () => {
         (usePokemonGame as Mock).mockReturnValue({
@@ -43,20 +54,8 @@ describe('<PokemonGame />', () => {
         (usePokemonGame as Mock).mockReturnValue({
             gameStatus: GameStatus.Playing,
             isLoading: false,
-            pokemonOptions: [
-                {
-                    id: 1,
-                    name: 'Bulbasaur',
-                },
-                {
-                    id: 2,
-                    name: 'Ivysaur',
-                },
-            ],
-            randomPokemon: {
-                id: 1,
-                name: 'Bulbasaur',
-            },
+            pokemonOptions: optionsPokemonsMock,
+            randomPokemon: optionsPokemonsMock.at(0),
             wonGames: 0,
             lostGames: 0,
             getNextRound: vi.fn(),
@@ -74,7 +73,32 @@ describe('<PokemonGame />', () => {
         expect(wrapper.findComponent(PokemonOptions)).toBeTruthy();
         expect(wrapper.findComponent(PokemonScore)).toBeTruthy();
 
+        // const buttons2 = wrapper.findAll('[class="capitalize disabled:shadow-none disabled:bg-gray-100"]');
+        // console.log(buttons2.length);
+        const buttons = wrapper.findAll('.capitalize.disabled\\:shadow-none.disabled\\:bg-gray-100');
+        expect(buttons.length).toBe(2);
+
         // expect(wrapper.find('section img').attributes('class')).toBe('brightness-0 h-[200px]');
         // expect(wrapper.find('section img').attributes('src')).toBe('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/1.svg');
+    })
+
+    test('test call the getNextRound function when button is clicked', async () => {
+        const spyNextRoundFn = vi.fn();
+        (usePokemonGame as Mock).mockReturnValue({
+            gameStatus: GameStatus.Won,
+            isLoading: false,
+            pokemonOptions: optionsPokemonsMock,
+            randomPokemon: optionsPokemonsMock.at(0),
+            wonGames: 1,
+            lostGames: 0,
+            getNextRound: spyNextRoundFn,
+            checkAnswer: vi.fn(),
+            resetTheGame: vi.fn(),
+        });
+        const wrapper = mount(PokemonGame, {});
+        const button = wrapper.find('button');
+        
+        await button.trigger('click');
+        expect(spyNextRoundFn).toHaveBeenCalledWith(5);
     })
 })
